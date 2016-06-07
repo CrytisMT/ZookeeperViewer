@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="retryPolicy" class="org.apache.curator.retry.RetryNTimes">
+        <constructor-arg index="0" value="3"/>
+        <constructor-arg index="1" value="3000"/>
+    </bean>
+
+    <bean id="factory" class="org.apache.curator.framework.CuratorFrameworkFactory" factory-method="newClient">
+        <constructor-arg index="0" value=""/>
+        <constructor-arg index="1" ref="retryPolicy"/>
+    </bean>
+
+    <bean id="zkClient" class="org.apache.curator.framework.imps.CuratorFrameworkImpl" factory-bean="factory"
+           init-method="start">
+
+    </bean>
+
+    <util:property-placeholder location="config.properties"/>
+</beans>
