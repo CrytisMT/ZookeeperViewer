@@ -1,15 +1,16 @@
 package com.maitaidan.controller;
 
+import com.google.common.collect.Lists;
 import com.maitaidan.model.GeneralResult;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.framework.api.GetDataBuilder;
-import org.apache.curator.retry.RetryNTimes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -18,23 +19,35 @@ import java.util.List;
  * Created by Crytis on 2016/5/10.
  * Just test.
  */
-@Slf4j
-@RestController
-@RequestMapping("/")
+@Controller
+@RequestMapping("a")
 public class MainController {
+    private Logger logger = LoggerFactory.getLogger(getClass());
+    @Resource
+    CuratorFramework curatorFramework;
 
-
-
+    @ResponseBody
     @RequestMapping("getNode")
     public GeneralResult<List> getNodes(String path) {
         if (StringUtils.isBlank(path)) {
             path = "/";
-//            log.info("path为空，设置为根目录");
+            logger.info("path为空，设置为根目录");
         }
-        CuratorFramework client = CuratorFrameworkFactory.newClient("zk.dev.corp.qunar.com:2181,zk.dev.qunar.com:2181,l-zk1.plat.dev.cn6.qunar.com:2181", new RetryNTimes(3, 300));
-        client.start();
-        GetDataBuilder data = client.getData();
-        return null;
+        List<String> znodes = null;
+        try {
+            znodes = curatorFramework.getChildren().forPath(path);
+        } catch (Exception e) {
+            logger.error("get znodes error", e);
+            return new GeneralResult<List>(false, Lists.newArrayList(), "查询节点失败");
+        }
+        return new GeneralResult<List>(true, znodes, "success");
+    }
+
+    public static void main(String[] args) throws Exception {
+        ApplicationContext applicationContext = new ClassPathXmlApplicationContext("application-context.xml");
+        CuratorFramework bean = applicationContext.getBean(CuratorFramework.class);
+        List<String> strings = bean.getChildren().forPath("/");
+        System.out.println(strings);
     }
 
 }
