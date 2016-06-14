@@ -21,7 +21,7 @@ import java.util.List;
  */
 @RestController
 public class MainController {
-    private Logger logger = LoggerFactory.getLogger(getClass());
+    private static Logger logger = LoggerFactory.getLogger(MainController.class);
     @Resource
     CuratorFramework curatorFramework;
 
@@ -47,7 +47,7 @@ public class MainController {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
         try {
-            curatorFramework.delete().forPath(path);
+            curatorFramework.delete().deletingChildrenIfNeeded().forPath(path);
         } catch (Exception e) {
             logger.error("delete node error", e);
             return new GeneralResult<>(false, null, "删除失败");
