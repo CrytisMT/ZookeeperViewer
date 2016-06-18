@@ -34,6 +34,9 @@ public class MainController {
         List<String> znodes = null;
         try {
             znodes = curatorFramework.getChildren().forPath(path);
+        } catch (IllegalArgumentException e) {
+            logger.info("路径不存在:{}",path);
+            return new GeneralResult<List>(true, Lists.newArrayList(), "查询节点失败");
         } catch (Exception e) {
             logger.error("get znodes error", e);
             return new GeneralResult<List>(false, Lists.newArrayList(), "查询节点失败");
