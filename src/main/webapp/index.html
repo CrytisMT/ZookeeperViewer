@@ -75,9 +75,9 @@
     $(function () {
         $.getJSON("/getNode?path=/", function (data) {
             $.each(data.data, function (i, v) {
-                var div = document.createElement("ul");
+                var div = $("<ul></ul>");
                 var btn = document.createElement("button");
-                $(btn).text(v).addClass("showNode").attr("value", "/" + v);
+                $(btn).text(v).addClass("showNode btn btn-info").attr("value", "/" + v);
                 $(div).append(btn);
                 $("#main").append(div);
             });
@@ -90,9 +90,9 @@
     });
 
     function insertBtn(obj, parentPath, nodePath) {
-        var div = document.createElement("ul");
+        var div = $("<ul></ul>");
         var btn = document.createElement("button");
-        $(btn).text(nodePath).addClass("showNode").attr("value", parentPath + "/" + nodePath).click(getNode);
+        $(btn).text(nodePath).addClass("showNode btn btn-info btn-sm").attr("value", parentPath + "/" + nodePath).click(getNode);
         $(div).append(btn);
         obj.after(div);
     }
@@ -100,7 +100,7 @@
     function getNode() {
         var btn = $(this);
         var allBro = btn.nextAll();
-        if (allBro.size()>0) {
+        if (allBro.size() > 0) {
             allBro.remove();
             return;
         }
@@ -109,7 +109,8 @@
             $.each(data.data, function (i, v) {
                 insertBtn(btn, parentPath, v);
             });
-        })
+        });
+
     }
 </script>
 </html>
