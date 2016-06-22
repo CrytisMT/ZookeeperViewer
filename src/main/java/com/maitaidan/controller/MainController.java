@@ -98,8 +98,13 @@ public class MainController {
 
     }
 
+    @RequestMapping("search")
+    public GeneralResult<List> searchPath(String keyword) {
+        return new GeneralResult<List>(true, Lists.newArrayList("aaa", "aab"), "success");
+    }
 
     private String checkPath(String path) {
+
         if (!StringUtils.startsWith(path, "/")) {
             return "/" + path;
 
