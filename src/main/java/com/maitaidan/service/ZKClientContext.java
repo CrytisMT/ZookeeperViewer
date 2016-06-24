@@ -6,7 +6,7 @@ import org.apache.curator.framework.CuratorFramework;
  * Created by Crytis on 2016/6/24.
  * 存放当前的client
  */
-public class ZKClientUtil {
+public class ZKClientContext {
 
     private static InheritableThreadLocal<CuratorFramework> currentClient = new InheritableThreadLocal<>();
 

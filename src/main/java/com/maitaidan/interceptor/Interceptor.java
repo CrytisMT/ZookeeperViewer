@@ -1,11 +1,9 @@
 package com.maitaidan.interceptor;
 
 import com.maitaidan.service.InitService;
-import com.maitaidan.service.ZKClientUtil;
+import com.maitaidan.service.ZKClientContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
 
 import javax.servlet.http.HttpServletRequest;
@@ -29,7 +27,7 @@ public class Interceptor extends HandlerInterceptorAdapter {
                 return false;
             } else {
                 log.debug("为{}设置threadLocal", clientParent);
-                ZKClientUtil.setCurrentClient(client);
+                ZKClientContext.setCurrentClient(client);
             }
         }
         return true;

@@ -5,7 +5,7 @@ import com.google.common.collect.Lists;
 import com.maitaidan.aop.ProcessArgs;
 import com.maitaidan.model.GeneralResult;
 import com.maitaidan.service.InitService;
-import com.maitaidan.service.ZKClientUtil;
+import com.maitaidan.service.ZKClientContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CreateBuilder;
@@ -32,21 +32,15 @@ public class MainController {
     @Resource
     InitService initService;
 
-    /**
-     * 如果通过接口添加了，这个是所有的
-     */
-    private Map<String, CuratorFramework> allCuratorFramework;
 
     @ProcessArgs
     @RequestMapping("getNode")
     public GeneralResult<List> getNodes(String path, String clientParent) {
-//        allCuratorFramework = initService.getAllBeans(CuratorFramework.class);
         if (StringUtils.isAnyBlank(clientParent)) {
             throw new IllegalArgumentException("clientParent父zk节点是空");
         }
         List<String> znodes;
-//        CuratorFramework curatorFramework = allCuratorFramework.get(clientParent);
-        CuratorFramework curatorFramework = ZKClientUtil.getCurrentClient();
+        CuratorFramework curatorFramework = ZKClientContext.getCurrentClient();
         Preconditions.checkNotNull(curatorFramework);
         try {
             znodes = curatorFramework.getChildren().forPath(path);
@@ -66,7 +60,7 @@ public class MainController {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
         try {
-            ZKClientUtil.getCurrentClient().delete().deletingChildrenIfNeeded().forPath(path);
+            ZKClientContext.getCurrentClient().delete().deletingChildrenIfNeeded().forPath(path);
         } catch (Exception e) {
             logger.error("delete node error", e);
             return new GeneralResult<>(false, null, "删除失败");
@@ -82,7 +76,7 @@ public class MainController {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
         try {
-            CreateBuilder createBuilder = ZKClientUtil.getCurrentClient().create();
+            CreateBuilder createBuilder = ZKClientContext.getCurrentClient().create();
             if (StringUtils.isBlank(value)) {
                 createBuilder.forPath(path);
             } else {
@@ -122,7 +116,7 @@ public class MainController {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
         try {
-            ZKClientUtil.getCurrentClient().setData().forPath(path, value.getBytes());
+            ZKClientContext.getCurrentClient().setData().forPath(path, value.getBytes());
         } catch (Exception e) {
             logger.error("delete node error", e);
             return new GeneralResult<>(false, null, "修改失败");
