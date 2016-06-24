@@ -78,11 +78,18 @@
 <script src="/lib/jquery-ui.min.js"></script>
 <script>
     $(function () {
-        $.getJSON("/getNode?path=/", function (data) {
+//        $.getJSON("/getClientList",function (data) {
+//            $.each(data.data, function (i, v) {
+//
+//            });
+//        })
+
+
+        $.getJSON("/getClientList", function (data) {
             $.each(data.data, function (i, v) {
                 var div = $("<ul></ul>");
                 var btn = document.createElement("button");
-                $(btn).text(v).addClass("showNode btn btn-info").attr("value", "/" + v);
+                $(btn).text(v).addClass("showNode btn btn-info").attr("data-path", "").attr("data-parent", v);
                 $(div).append(btn);
                 $("#main").append(div);
             });
@@ -109,10 +116,10 @@
 
     });
 
-    function insertBtn(obj, parentPath, nodePath) {
+    function insertBtn(obj, parentPath, clientParent, nodePath) {
         var div = $("<ul></ul>");
         var btn = document.createElement("button");
-        $(btn).text(nodePath).addClass("showNode btn btn-info btn-sm").attr("value", parentPath + "/" + nodePath).click(getNode);
+        $(btn).text(nodePath).addClass("showNode btn btn-info btn-sm").attr("data-path", parentPath + "/" + nodePath).attr("data-parent", clientParent).click(getNode);
         $(div).append(btn);
         obj.after(div);
     }
@@ -124,10 +131,12 @@
             allBro.remove();
             return;
         }
-        var parentPath = $(this).val();
-        $.getJSON("/getNode?path=" + parentPath, function (data) {
+        var parentPath = btn.attr("data-path");
+        var clientParent = btn.attr("data-parent");
+        $.getJSON("/getNode", {path: parentPath, clientParent: clientParent}, function (data) {
+
             $.each(data.data, function (i, v) {
-                insertBtn(btn, parentPath, v);
+                insertBtn(btn, parentPath, clientParent, v);
             });
         });
 

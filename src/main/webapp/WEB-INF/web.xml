@@ -6,6 +6,19 @@
 
     <display-name>Archetype Created Web Application</display-name>
 
+    <!--更改ContextLoaderListener的默认配置文件地址-->
+    <!--<context-param>-->
+        <!--<param-name>contextConfigLocation</param-name>-->
+        <!--<param-value>-->
+            <!--classpath:application-context.xml-->
+        <!--</param-value>-->
+    <!--</context-param>-->
+
+    <!--用于启动webApplicationContext,webApplicationContext是xml类型的-->
+    <!--<listener>-->
+        <!--<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>-->
+    <!--</listener>-->
+
     <servlet>
         <servlet-name>dispatch</servlet-name>
         <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>

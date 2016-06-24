@@ -11,7 +11,7 @@ public class MainControllerTest {
     @Test
     public void createConnection() throws Exception {
         MainController mainController = new MainController();
-        mainController.getNodes("/");
+//        mainController.getNodes("/");
     }
 
 }

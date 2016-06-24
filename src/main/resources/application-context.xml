@@ -11,16 +11,27 @@
     <mvc:default-servlet-handler/>
 
 
-    <bean id="retryPolicy" class="org.apache.curator.retry.RetryNTimes">
-        <constructor-arg index="0" value="3"/>
-        <constructor-arg index="1" value="3000"/>
-    </bean>
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <mvc:exclude-mapping path="/lib/**"/>
+            <mvc:exclude-mapping path="*.html"/>
+            <bean class="com.maitaidan.interceptor.Interceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
 
-    <bean id="factory" class="org.apache.curator.framework.CuratorFrameworkFactory" factory-method="newClient"
-          init-method="start">
-        <constructor-arg index="0" value="${zk.address}"/>
-        <constructor-arg index="1" ref="retryPolicy"/>
-    </bean>
+    <!--<bean id="retryPolicy" class="org.apache.curator.retry.RetryNTimes">-->
+        <!--<constructor-arg index="0" value="3"/>-->
+        <!--<constructor-arg index="1" value="3000"/>-->
+    <!--</bean>-->
+
+    <!--<bean id="factory" class="org.apache.curator.framework.CuratorFrameworkFactory" factory-method="newClient"-->
+          <!--init-method="start">-->
+        <!--<constructor-arg index="0" value="${zk.address}"/>-->
+        <!--<constructor-arg index="1" ref="retryPolicy"/>-->
+    <!--</bean>-->
 
     <context:property-placeholder location="classpath:config.properties" ignore-unresolvable="false"/>
+
+    <import resource="application-aop.xml"/>
 </beans>
