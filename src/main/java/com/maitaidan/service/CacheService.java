@@ -24,13 +24,13 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class CacheService {
 
-    @Value("#{'${LoadCacheOnStart}'")
-    private boolean loadCache;
+    @Value("${LoadCacheOnStart}")
+    private String loadCache;
     //key 是connectString，value的key是node名，value的value是完整path
     private HashMap<String, Multimap<String, String>> pathCache = Maps.newHashMap();
 
     public void reloadAll() {
-        if (!loadCache) return;
+        if (!Boolean.valueOf(loadCache)) return;
 
         Stopwatch stopwatch = Stopwatch.createStarted();
         log.info("reload cache start...");
@@ -76,7 +76,6 @@ public class CacheService {
      *
      * @param keyword
      * @return zk名:完整path
-     * todo 只支持node搜索，不能完整的path搜索，/没有处理
      * todo 增量更新
      */
     public Map<String, Set<String>> search(String keyword) {
@@ -84,11 +83,13 @@ public class CacheService {
         if (StringUtils.isBlank(keyword)) return result;
 
         for (Map.Entry<String, Multimap<String, String>> entry : pathCache.entrySet()) {
-            Multimap<String, String> paths = entry.getValue();
+            Multimap<String, String> nodeAndPath = entry.getValue();
             HashSet<String> pathsSet = Sets.newHashSet();
-            for (String key : paths.keySet()) {
-                if (key.contains(keyword)) {
-                    pathsSet.addAll(paths.get(key));
+            for (String key : nodeAndPath.keySet()) {
+                for (String fullPath : nodeAndPath.get(key)) {
+                    if (fullPath.contains(keyword)) {
+                        pathsSet.add(fullPath);
+                    }
                 }
             }
             if (!pathsSet.isEmpty()) {
