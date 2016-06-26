@@ -19,14 +19,14 @@ public class Interceptor extends HandlerInterceptorAdapter {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         String clientParent = request.getParameter("clientParent");
         if (clientParent == null) {
-            log.info("{}参数没有clientParent", request.getRequestURI());
+            log.info("请求{}没有clientParent，不进行设置client", request.getRequestURI());
             return true;
         } else {
             CuratorFramework client = InitService.getAllBeans(CuratorFramework.class).get(clientParent);
             if (client == null) {
                 return false;
             } else {
-                log.debug("为{}设置threadLocal", clientParent);
+                log.debug("为连接{}设置client", clientParent);
                 ZKClientContext.setCurrentClient(client);
             }
         }

@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.maitaidan.aop.ProcessArgs;
 import com.maitaidan.model.GeneralResult;
+import com.maitaidan.service.CacheService;
 import com.maitaidan.service.InitService;
 import com.maitaidan.service.ZKClientContext;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Created by Crytis on 2016/5/10.
@@ -31,6 +33,9 @@ public class MainController {
     List<CuratorFramework> curatorFrameworkList;
     @Resource
     InitService initService;
+    @Resource
+    CacheService cacheService;
+
 
 
     @ProcessArgs
@@ -127,8 +132,9 @@ public class MainController {
     }
 
     @RequestMapping("search")
-    public GeneralResult<List> searchPath(String keyword) {
-        return new GeneralResult<List>(true, Lists.newArrayList("aaa", "aab"), "success");
+    public GeneralResult<Map> searchPath(String keyword) {
+        Map<String, Set<String>> searchResult = cacheService.search(keyword);
+        return new GeneralResult<Map>(true, searchResult, "success");
     }
 
     private String checkPath(String path) {

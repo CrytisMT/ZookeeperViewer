@@ -104,13 +104,17 @@
                 var arr = [];
                 $.getJSON("/search?keyword=" + request.term, function (data) {
                     $.each(data.data, function (i, v) {
-                        arr[i] = v;
+                        $.each(v,function (index, value) {
+                            arr[index] = value;
+                        })
                     });
                     //要在这里调用，否则异步的ajax，数组是空的
                     response(arr);
                 }, "json");
 
-            }
+            },
+            minLength:2
+
         });
 
 

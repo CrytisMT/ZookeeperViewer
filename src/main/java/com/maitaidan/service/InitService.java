@@ -17,6 +17,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 
@@ -32,6 +33,8 @@ public class InitService implements ApplicationContextAware {
 
     @Value("#{'${zk.address}'.split('\\|')}")
     private List<String> servers;
+    @Resource
+    CacheService cacheService;
 
     /**
      * bean name是zk地址
@@ -45,16 +48,18 @@ public class InitService implements ApplicationContextAware {
             registerBeanToSpring(server, curatorFramework);
         }
         logger.info("curatorFramework实例创建完毕...");
+        cacheService.reloadAll();
+
     }
 
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
+        InitService.applicationContext = applicationContext;
     }
 
     private void registerBeanToSpring(String beanName, Object obj) {
-        ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) this.applicationContext;
+        ConfigurableApplicationContext configurableApplicationContext = (ConfigurableApplicationContext) applicationContext;
         ConfigurableListableBeanFactory beanFactory = configurableApplicationContext.getBeanFactory();
         beanFactory.registerSingleton(beanName, obj);
     }
@@ -64,7 +69,7 @@ public class InitService implements ApplicationContextAware {
         Preconditions.checkArgument(StringUtils.isNotBlank(address), "新增zk地址为空！");
         CuratorFramework bean = null;
         try {
-            bean = this.applicationContext.getBean(address, CuratorFramework.class);
+            bean = applicationContext.getBean(address, CuratorFramework.class);
             if (bean != null) {
                 logger.info("{}已经存在，不再添加", address);
                 return;
