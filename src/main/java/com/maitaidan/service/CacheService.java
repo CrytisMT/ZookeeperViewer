@@ -86,6 +86,7 @@ public class CacheService {
             Multimap<String, String> nodeAndPath = entry.getValue();
             HashSet<String> pathsSet = Sets.newHashSet();
             for (String key : nodeAndPath.keySet()) {
+                //从path中匹配
                 for (String fullPath : nodeAndPath.get(key)) {
                     if (fullPath.contains(keyword)) {
                         pathsSet.add(fullPath);
