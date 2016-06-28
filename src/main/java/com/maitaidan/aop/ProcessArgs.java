@@ -7,7 +7,8 @@ import java.lang.annotation.Target;
 
 /**
  * Created by Crytis on 2016/6/24.
- * Just test.
+ * path如果是空字符串则设置为/
+ * .
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

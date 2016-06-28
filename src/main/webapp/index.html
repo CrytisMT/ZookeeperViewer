@@ -5,9 +5,9 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>ZooKeeper</title>
-    <link rel="stylesheet" href="/lib/bootstrap.min.css">
-    <link rel="stylesheet" href="/lib/dashboard.css">
-    <link rel="stylesheet" href="/lib/jquery-ui.min.css">
+    <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/lib/css/dashboard.css">
+    <link rel="stylesheet" href="/lib/css/jquery-ui.min.css">
 
 </head>
 <body>
@@ -69,11 +69,13 @@
     </div>
 
 </div>
-</div>
+<!--</div>-->
+
 </body>
-<script src="/lib/jquery-2.2.3.min.js"></script>
-<script src="/lib/bootstrap.min.js"></script>
-<script src="/lib/jquery-ui.min.js"></script>
+<script src="/lib/js/jquery-2.2.3.min.js"></script>
+<script src="/lib/js/bootstrap.min.js"></script>
+<script src="/lib/js/jquery-ui.min.js"></script>
+<script src="/lib/js/BootstrapMenu.min.js"></script>
 <script>
     $(function () {
 
@@ -96,7 +98,7 @@
                 var arr = [];
                 $.getJSON("/search?keyword=" + request.term, function (data) {
                     $.each(data.data, function (i, v) {
-                        $.each(v,function (index, value) {
+                        $.each(v, function (index, value) {
                             arr[index] = value;
                         })
                     });
@@ -105,8 +107,8 @@
                 }, "json");
 
             },
-            minLength:2,
-            select:function (event,ui) {
+            minLength: 2,
+            select: function (event, ui) {
                 $(this).attr("")
 
             }
@@ -115,12 +117,24 @@
 
         $("#searchBtn").click(function () {
             var searchKey = $("#search").val();
-            if (searchKey.length<1) {
+            if (searchKey.length < 1) {
                 return false;
             }
+        });
+
+        //bind delete,add,edit for buttons
+        var menu = new BootstrapMenu(".showNode", {
+            fetchElementData: function ($btn) {
+                //获取在哪个btn上点击的
+                return $btn;
+            },
+            actions: [{
+                name: "edit",
+                onClick: function ($btn) {
+                    console.log($btn);
+                }
+            }]
         })
-
-
     });
 
     function insertBtn(obj, parentPath, clientParent, nodePath) {
@@ -148,5 +162,7 @@
         });
 
     }
+
+
 </script>
 </html>
