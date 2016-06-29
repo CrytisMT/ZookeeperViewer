@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/lib/css/bootstrap.min.css">
     <link rel="stylesheet" href="/lib/css/dashboard.css">
     <link rel="stylesheet" href="/lib/css/jquery-ui.min.css">
+    <link rel="stylesheet" href="/lib/css/toastr.min.css">
 
 </head>
 <body>
@@ -76,6 +77,7 @@
 <script src="/lib/js/bootstrap.min.js"></script>
 <script src="/lib/js/jquery-ui.min.js"></script>
 <script src="/lib/js/BootstrapMenu.min.js"></script>
+<script src="/lib/js/toastr.min.js"></script>
 <script>
     $(function () {
 
@@ -129,12 +131,45 @@
                 return $btn;
             },
             actions: [{
-                name: "edit",
+                name: "删除",
                 onClick: function ($btn) {
                     console.log($btn);
+                    $.ajax("/deleteNode", {
+                        data: {path: $btn.attr("data-path"), clientParent: $btn.attr("data-parent")},
+                        success: function (data) {
+                            if (data.ret) {
+                                toastr.success("删除成功");
+                                $btn.slideUp(300, function () {
+                                    $(this).remove();
+                                });
+                            } else {
+                                toastr.error(data.msg);
+                            }
+                        }
+                    })
                 }
             }]
-        })
+        });
+
+
+        //通知的配置
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": false,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
     });
 
     function insertBtn(obj, parentPath, clientParent, nodePath) {
