@@ -4,12 +4,16 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.maitaidan.aop.ProcessArgs;
 import com.maitaidan.model.GeneralResult;
+import com.maitaidan.model.ZNode;
 import com.maitaidan.service.CacheService;
 import com.maitaidan.service.InitService;
 import com.maitaidan.service.ZKClientContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.api.CreateBuilder;
+import org.apache.zookeeper.ZKUtil;
+import org.apache.zookeeper.data.ACL;
+import org.apache.zookeeper.data.Stat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -96,10 +100,26 @@ public class MainController {
 
     }
 
+    @RequestMapping("getNodeData")
+    public GeneralResult<ZNode> getNodeDate(String path, String clientParent) throws Exception {
+        if (StringUtils.isAnyBlank(path,clientParent)) {
+            return new GeneralResult<>(false, null, "参数不能为空");
+        }
+        CuratorFramework currentClient = ZKClientContext.getCurrentClient();
+        // TODO: 2016/7/5
+        System.out.println(ZKUtil.listSubTreeBFS(currentClient.getZookeeperClient().getZooKeeper(), path));
+        byte[] dataBytes = currentClient.getData().forPath(path);
+        List<ACL> aclList = currentClient.getACL().forPath(path);
+        Stat stat = currentClient.setData().forPath(path);
+        logger.info("acl:{}",aclList);
+        ZNode zNode = new ZNode(path,new String(dataBytes),aclList,stat);
+        return new GeneralResult<>(true, zNode, "success");
+    }
+
     @RequestMapping("getClientList")
     public GeneralResult<List> getClientList() {
         List<String> clientList = Lists.newArrayList();
-        Map<String, CuratorFramework> allCuratorFrameworks = initService.getAllBeans(CuratorFramework.class);
+        Map<String, CuratorFramework> allCuratorFrameworks = InitService.getAllBeans(CuratorFramework.class);
         for (Map.Entry<String, CuratorFramework> curatorFrameworkEntry : allCuratorFrameworks.entrySet()) {
             clientList.add(curatorFrameworkEntry.getValue().getZookeeperClient().getCurrentConnectionString());
         }
