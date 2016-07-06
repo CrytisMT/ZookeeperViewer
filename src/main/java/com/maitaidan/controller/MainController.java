@@ -110,7 +110,7 @@ public class MainController {
         System.out.println(ZKUtil.listSubTreeBFS(currentClient.getZookeeperClient().getZooKeeper(), path));
         byte[] dataBytes = currentClient.getData().forPath(path);
         List<ACL> aclList = currentClient.getACL().forPath(path);
-        Stat stat = currentClient.setData().forPath(path);
+        Stat stat = currentClient.getZookeeperClient().getZooKeeper().exists(path, false);
         logger.info("acl:{}",aclList);
         ZNode zNode = new ZNode(path,new String(dataBytes),aclList,stat);
         return new GeneralResult<>(true, zNode, "success");

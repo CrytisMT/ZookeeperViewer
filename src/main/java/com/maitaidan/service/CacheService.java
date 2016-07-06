@@ -1,16 +1,17 @@
 package com.maitaidan.service;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.*;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
-import sun.security.action.GetLongAction;
 
-import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -41,11 +42,12 @@ public class CacheService {
             Multimap<String, String> aLlNodes = getALlNodes(curatorFramework, "/");
             pathCache.put(key, aLlNodes);
         }
-        log.info("cache加载完毕，耗时:{}",stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
+        log.info("cache加载完毕，耗时:{}", stopwatch.stop().elapsed(TimeUnit.MILLISECONDS));
     }
 
     /**
      * todo 多线程
+     *
      * @param client
      * @param path
      * @return
@@ -73,7 +75,6 @@ public class CacheService {
     }
 
     /**
-     *
      * @param keyword
      * @return zk名:完整path
      * todo 增量更新

@@ -71,19 +71,88 @@
 
 </div>
 <!--</div>-->
-<div id="modal" class="modal fade bs-example-modal-sm" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
+<!--编辑、查看框-->
+<div id="modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel"
      style="display: none;">
-    <div class="modal-dialog modal-sm">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
 
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
                         aria-hidden="true">×</span></button>
-                <h4 class="modal-title" id="mySmallModalLabel">编辑节点</h4>
+                <h4 class="modal-title" id="mySmallModalLabel">Title</h4>
             </div>
             <div class="modal-body">
-                <form class="form-control">
-                    <label>Data</label><input type="text">
+                <form id="nodeDataForm" class="form-group">
+                    <div class="form-inline">
+                        <label for="modalPath">PATH</label>
+                        <input id="modalPath" name="path" data-toggle="tooltip"
+                               data-placement="top" title="节点路径"
+                               class="form-control"
+                               readonly>
+                        <label for="modalCZXid">CZXid</label>
+                        <input id="modalCZXid" data-toggle="tooltip"
+                               data-placement="top" title="节点创建时的zxid"
+                               class="form-control" disabled>
+                        <label for="modalMZXid">modalMZXid</label>
+                        <input id="modalMZXid" data-toggle="tooltip"
+                               data-placement="top" title="最新一次更新发生时的zxid"
+                               class="form-control" disabled>
+                    </div>
+                    <div class="form-inline">
+                        <label for="modalPZXid">modalPZXid</label>
+                        <input id="modalPZXid" data-toggle="tooltip"
+                               data-placement="top" title="不知道是啥"
+                               class="form-control" disabled>
+                        <label for="modalCTime">modalCTime</label>
+                        <input id="modalCTime" data-toggle="tooltip"
+                               data-placement="top" title="节点创建时的时间戳"
+                               class="form-control" disabled>
+                        <label for="modalMTime">modalMTime</label>
+                        <input id="modalMTime" data-toggle="tooltip"
+                               data-placement="top" title="节点最新一次更新发生时的时间戳"
+                               class="form-control" disabled>
+                    </div>
+                    <div class="form-inline">
+
+                        <label for="modalVersion">modalVersion</label>
+                        <input id="modalVersion" data-toggle="tooltip"
+                               data-placement="top" title="节点数据的更新次数"
+                               class="form-control" disabled>
+                        <label for="modalCVersion">modalCVersion</label>
+                        <input id="modalCVersion" data-toggle="tooltip"
+                               data-placement="top" title="子节点的更新次数"
+                               class="form-control" disabled>
+                        <label for="modalAVersion">modalAVersion</label>
+                        <input id="modalAVersion" data-toggle="tooltip"
+                               data-placement="top" title="节点ACL(授权信息)的更新次数"
+                               class="form-control" disabled>
+                    </div>
+                    <div class="form-inline">
+                        <label for="modalNumChildren">modalNumChildren</label>
+                        <input id="modalNumChildren"
+                               data-toggle="tooltip"
+                               data-placement="top"
+                               title="子节点个数"
+                               class="form-control"
+                               disabled>
+                        <label for="modalEphemeralOwner">modalEphemeralOwner</label>
+                        <input id="modalEphemeralOwner"
+                               data-toggle="tooltip"
+                               data-placement="top"
+                               title="ephemeralOwner"
+                               class="form-control"
+                               disabled>
+                    </div>
+                    <div class="form-group">
+                        <label for="modalNodeData">Data</label>
+                        <input id="modalNodeData" name="value" class="form-control" type="text"/>
+                        <input id="modalClientParent" type="text" class="hidden form-control" name="clientParent">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn btn-primary" id="editBtn" data-dismiss="modal">保存</button>
+                        <button class="btn btn-primary" data-dismiss="modal" aria-label="Close">取消</button>
+                    </div>
                 </form>
             </div>
         </div><!-- /.modal-content -->
@@ -102,7 +171,7 @@
             $.each(data.data, function (i, v) {
                 var div = $("<ul></ul>");
                 var btn = document.createElement("button");
-                $(btn).text(v).addClass("showNode btn btn-info").attr("data-path", "").attr("data-parent", v);
+                $(btn).text(v).addClass("showNode btn btn-info").attr("data-path", "").attr("data-clientName", v);
                 $(div).append(btn);
                 $("#main").append(div);
             });
@@ -118,7 +187,11 @@
                 $.getJSON("/search?keyword=" + request.term, function (data) {
                     $.each(data.data, function (i, v) {
                         $.each(v, function (index, value) {
-                            arr[index] = value;
+                            var obj = {};
+                            obj.label = value;
+                            obj.value = value;
+                            obj.zkName = i;
+                            arr[index] = obj;
                         })
                     });
                     //要在这里调用，否则异步的ajax，数组是空的
@@ -128,8 +201,7 @@
             },
             minLength: 2,
             select: function (event, ui) {
-                $(this).attr("")
-
+                $(this).attr("selected-zkName", ui.item.zkName);
             }
 
         });
@@ -151,7 +223,7 @@
                 name: "删除",
                 onClick: function ($btn) {
                     $.ajax("/deleteNode", {
-                        data: {path: $btn.attr("data-path"), clientParent: $btn.attr("data-parent")},
+                        data: {path: $btn.attr("data-path"), clientParent: $btn.attr("data-clientName")},
                         success: function (data) {
                             if (data.ret) {
                                 toastr.success("删除成功");
@@ -167,7 +239,24 @@
             }, {
                 name: "编辑",
                 onClick: function ($btn) {
-                    $("#modal").modal();
+//                    var nodeData = getNodeData($btn.attr("data-clientName"), $btn.attr("data-path"));
+                    $("#modalClientParent").val($btn.attr("data-clientName"));
+                    $.getJSON("/getNodeData", {
+                                clientParent: $btn.attr("data-clientName"),
+                                path: $btn.attr("data-path")
+                            },
+                            function (data) {
+                                if (data.ret) {
+                                    $("#modalNodeData").val(data.data.nodeData);
+                                    $("#mySmallModalLabel").text("编辑");
+                                    $("#modalPath").val($btn.attr("data-path"));
+                                    fillModalForm(data);
+                                    $("#modal").modal();
+                                } else {
+                                    toastr.error(data.msg);
+                                }
+                            });
+
                 }
             }, {
                 name: "添加子节点",
@@ -175,6 +264,17 @@
 
                 }
             }]
+        });
+
+        $("#editBtn").click(function () {
+            //todo 关闭后不刷新
+            $.post("/modifyValue", $("#nodeDataForm").serialize(), function (data) {
+                if (data.ret) {
+                    toastr.info("修改成功!");
+                } else {
+                    toastr.error(data.msg);
+                }
+            }, "json")
         });
 
 
@@ -195,13 +295,17 @@
             "hideEasing": "linear",
             "showMethod": "fadeIn",
             "hideMethod": "fadeOut"
-        }
+        };
+        $("[data-toggle='tooltip']").tooltip();
+//        $("#cancle").click(function () {
+//            $("#modal").modal("hide");
+//        })
     });
 
     function insertBtn(obj, parentPath, clientParent, nodePath) {
         var div = $("<ul></ul>");
         var btn = document.createElement("button");
-        $(btn).text(nodePath).addClass("showNode btn btn-info btn-sm").attr("data-path", parentPath + "/" + nodePath).attr("data-parent", clientParent).click(getNode);
+        $(btn).text(nodePath).addClass("showNode btn btn-info btn-sm").attr("data-path", parentPath + "/" + nodePath).attr("data-clientName", clientParent).click(getNode);
         $(div).append(btn);
         obj.after(div);
     }
@@ -214,7 +318,7 @@
             return;
         }
         var parentPath = btn.attr("data-path");
-        var clientParent = btn.attr("data-parent");
+        var clientParent = btn.attr("data-clientName");
         $.getJSON("/getNode", {path: parentPath, clientParent: clientParent}, function (data) {
 
             $.each(data.data, function (i, v) {
@@ -224,6 +328,35 @@
 
     }
 
+    function getNodeData(clientName, path) {
+        $.getJSON("/getNodeData",
+                {
+                    clientParent: clientName,
+                    path: path
+                },
+                function (data) {
+                    console.log(data.data.nodeData);
+                    return data.data.nodeData;
+                });
+    }
+
+    /**
+     * 填充模态框的参数
+     * @param data  接口返回的data
+     */
+    function fillModalForm(data) {
+        var stat = data.data.stat;
+        $("#modalCZXid").val(stat.czxid);
+        $("#modalMZXid").val(stat.mzxid);
+        $("#modalCTime").val(stat.ctime);
+        $("#modalMTime").val(stat.mtime);
+        $("#modalVersion").val(stat.version);
+        $("#modalCVersion").val(stat.cversion);
+        $("#modalAVersion").val(stat.aversion);
+        $("#modalEphemeralOwner").val(stat.ephemeralOwner);
+        $("#modalNumChildren").val(stat.numChildren);
+        $("#modalPZXid").val(stat.pzxid);
+    }
 
 </script>
 </html>
