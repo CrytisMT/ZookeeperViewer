@@ -41,60 +41,39 @@ public class MainController {
     CacheService cacheService;
 
 
-
     @ProcessArgs
     @RequestMapping("getNode")
-    public GeneralResult<List> getNodes(String path, String clientParent) {
+    public GeneralResult<List> getNodes(String path, String clientParent) throws Exception {
         if (StringUtils.isAnyBlank(clientParent)) {
             throw new IllegalArgumentException("clientParent父zk节点是空");
         }
         List<String> znodes;
         CuratorFramework curatorFramework = ZKClientContext.getCurrentClient();
         Preconditions.checkNotNull(curatorFramework);
-        try {
-            znodes = curatorFramework.getChildren().forPath(path);
-        } catch (IllegalArgumentException e) {
-            logger.info("路径不存在:{}", path);
-            return new GeneralResult<List>(true, Lists.newArrayList(), "查询节点失败");
-        } catch (Exception e) {
-            logger.error("get znodes Error", e);
-            return new GeneralResult<List>(false, Lists.newArrayList(), "查询节点失败");
-        }
+        znodes = curatorFramework.getChildren().forPath(path);
         return new GeneralResult<List>(true, znodes, "success");
     }
 
     @RequestMapping("deleteNode")
-    public GeneralResult<Void> deleteNode(String path, String clientParent) {
+    public GeneralResult<Void> deleteNode(String path, String clientParent) throws Exception {
         if (StringUtils.isAnyBlank(path, clientParent)) {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
-        try {
-            ZKClientContext.getCurrentClient().delete().deletingChildrenIfNeeded().forPath(path);
-        } catch (Exception e) {
-            logger.error("delete node error", e);
-            return new GeneralResult<>(false, null, "删除失败");
-
-        }
+        ZKClientContext.getCurrentClient().delete().deletingChildrenIfNeeded().forPath(path);
         return new GeneralResult<>(true, null, "success");
 
     }
 
     @RequestMapping("addNode")
-    public GeneralResult<Void> addNode(String path, String value) {
+    public GeneralResult<Void> addNode(String path, String value) throws Exception {
         if (StringUtils.isAnyBlank(path)) {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
-        try {
-            CreateBuilder createBuilder = ZKClientContext.getCurrentClient().create();
-            if (StringUtils.isBlank(value)) {
-                createBuilder.forPath(path);
-            } else {
-                createBuilder.forPath(path, value.getBytes());
-            }
-        } catch (Exception e) {
-            logger.error("delete node error", e);
-            return new GeneralResult<>(false, null, "添加失败");
-
+        CreateBuilder createBuilder = ZKClientContext.getCurrentClient().create();
+        if (StringUtils.isBlank(value)) {
+            createBuilder.forPath(path);
+        } else {
+            createBuilder.forPath(path, value.getBytes());
         }
         return new GeneralResult<>(true, null, "success");
 
@@ -102,7 +81,7 @@ public class MainController {
 
     @RequestMapping("getNodeData")
     public GeneralResult<ZNode> getNodeDate(String path, String clientParent) throws Exception {
-        if (StringUtils.isAnyBlank(path,clientParent)) {
+        if (StringUtils.isAnyBlank(path, clientParent)) {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
         CuratorFramework currentClient = ZKClientContext.getCurrentClient();
@@ -111,8 +90,8 @@ public class MainController {
         byte[] dataBytes = currentClient.getData().forPath(path);
         List<ACL> aclList = currentClient.getACL().forPath(path);
         Stat stat = currentClient.getZookeeperClient().getZooKeeper().exists(path, false);
-        logger.info("acl:{}",aclList);
-        ZNode zNode = new ZNode(path,new String(dataBytes),aclList,stat);
+        logger.info("acl:{}", aclList);
+        ZNode zNode = new ZNode(path, new String(dataBytes), aclList, stat);
         return new GeneralResult<>(true, zNode, "success");
     }
 
@@ -136,17 +115,11 @@ public class MainController {
 
 
     @RequestMapping("modifyValue")
-    public GeneralResult<Void> modifyValue(String path, String value) {
+    public GeneralResult<Void> modifyValue(String path, String value) throws Exception {
         if (StringUtils.isAnyEmpty(path, value)) {
             return new GeneralResult<>(false, null, "参数不能为空");
         }
-        try {
-            ZKClientContext.getCurrentClient().setData().forPath(path, value.getBytes());
-        } catch (Exception e) {
-            logger.error("delete node error", e);
-            return new GeneralResult<>(false, null, "修改失败");
-
-        }
+        ZKClientContext.getCurrentClient().setData().forPath(path, value.getBytes());
         return new GeneralResult<>(true, null, "success");
 
     }
