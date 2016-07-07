@@ -52,7 +52,7 @@ public class CacheService {
      * @param path
      * @return
      */
-    public Multimap<String, String> getALlNodes(CuratorFramework client, String path) {
+    private Multimap<String, String> getALlNodes(CuratorFramework client, String path) {
         HashMultimap<String, String> multimap = HashMultimap.create();
         List<String> childrenNodes;
         try {

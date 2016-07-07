@@ -18,9 +18,15 @@ public class ControllerExceptionHandler {
 
     @ExceptionHandler(KeeperException.NoNodeException.class)
     @ResponseBody
-    public GeneralResult<Void> processNoNodeException(Exception e){
+    public GeneralResult<Void> processNoNodeException(KeeperException.NoNodeException e){
         log.error("node不存在{}",e.getMessage());
         return new GeneralResult<>(false, null, "节点已经不存在，请刷新后重试！");
+    }
+
+    @ExceptionHandler(KeeperException.ConnectionLossException.class)
+    @ResponseBody
+    public GeneralResult<Void> processConnectionException(KeeperException.ConnectionLossException e){
+        return new GeneralResult<>(false, null, "创建连接失败！！");
     }
 
 

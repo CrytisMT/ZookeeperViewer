@@ -4,7 +4,8 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
-import org.apache.curator.retry.RetryForever;
+import org.apache.curator.retry.RetryNTimes;
+import org.apache.zookeeper.KeeperException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
@@ -27,14 +28,17 @@ import java.util.Map;
  */
 @Service
 public class InitService implements ApplicationContextAware {
-    private Logger logger = LoggerFactory.getLogger(InitService.class);
-    private RetryForever retryForever = new RetryForever(1000);
     private static ApplicationContext applicationContext;
-
-    @Value("#{'${zk.address}'.split('\\|')}")
-    private List<String> servers;
     @Resource
     CacheService cacheService;
+    private Logger logger = LoggerFactory.getLogger(InitService.class);
+    private RetryNTimes retryPolicy = new RetryNTimes(3, 1000);
+    @Value("#{'${zk.address}'.split('\\|')}")
+    private List<String> servers;
+
+    public static <T> Map<String, T> getAllBeans(Class<T> clazz) {
+        return applicationContext.getBeansOfType(clazz);
+    }
 
     /**
      * bean name是zk地址
@@ -43,7 +47,7 @@ public class InitService implements ApplicationContextAware {
     public void initCuratorFramework() {
         for (String server : servers) {
             logger.info("创建{}连接实例...", server);
-            CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(server, retryForever);
+            CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(server, retryPolicy);
             curatorFramework.start();
             registerBeanToSpring(server, curatorFramework);
         }
@@ -51,7 +55,6 @@ public class InitService implements ApplicationContextAware {
         cacheService.reloadAll();
 
     }
-
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
@@ -64,27 +67,35 @@ public class InitService implements ApplicationContextAware {
         beanFactory.registerSingleton(beanName, obj);
     }
 
-
-    public void addZKClient(String address) {
-        Preconditions.checkArgument(StringUtils.isNotBlank(address), "新增zk地址为空！");
-        CuratorFramework bean = null;
+    public void addZKClient(String clientName) throws KeeperException.ConnectionLossException {
+        Preconditions.checkArgument(StringUtils.isNotBlank(clientName), "新增zk地址为空！");
+        CuratorFramework bean;
         try {
-            bean = applicationContext.getBean(address, CuratorFramework.class);
+            bean = applicationContext.getBean(clientName, CuratorFramework.class);
             if (bean != null) {
-                logger.info("{}已经存在，不再添加", address);
+                logger.info("{}已经存在，不再添加", clientName);
                 return;
             }
         } catch (NoSuchBeanDefinitionException e) {
-            logger.info("添加连接{}", address);
+            logger.info("添加连接{}", clientName);
         }
 
-        CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(address, retryForever);
-        curatorFramework.start();
-        logger.info("{}启动成功...",address);
-        registerBeanToSpring(address, curatorFramework);
+        CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(clientName, retryPolicy);
+        try {
+            curatorFramework.start();
+            curatorFramework.getChildren().forPath("/zookeeper");
+        } catch (Exception e) {
+            logger.error("{}添加新zk失败",e.getMessage());
+            throw new KeeperException.ConnectionLossException();
+        }
+        logger.info("{}启动成功...", clientName);
+        registerBeanToSpring(clientName, curatorFramework);
+        // TODO: 2016/7/7  添加后刷新缓存 且不阻断
+        // TODO: 2016/7/7 一个zk链接失效后   阻碍
+//        cacheService.reloadAll();
     }
 
-    public static  <T> Map<String, T> getAllBeans(Class<T> clazz) {
-        return applicationContext.getBeansOfType(clazz);
+    public void deleteZKClient(String clientName) {
+
     }
 }

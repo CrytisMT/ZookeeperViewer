@@ -105,13 +105,6 @@ public class MainController {
         return new GeneralResult<List>(true, clientList, "success");
     }
 
-    @ProcessArgs
-    @RequestMapping("addClient")
-    public GeneralResult<Void> addClientList(String address) {
-        if (StringUtils.isBlank(address)) return new GeneralResult<>(false, null, "参数错误");
-        initService.addZKClient(address);
-        return new GeneralResult<>(true, null, "添加成功");
-    }
 
 
     @RequestMapping("modifyValue")
