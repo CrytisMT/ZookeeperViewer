@@ -80,12 +80,12 @@ public class InitService implements ApplicationContextAware {
             logger.info("添加连接{}", clientName);
         }
 
-        CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(clientName, retryPolicy);
+        CuratorFramework curatorFramework = CuratorFrameworkFactory.newClient(clientName, 1000, 1000, retryPolicy);
         try {
             curatorFramework.start();
             curatorFramework.getChildren().forPath("/zookeeper");
         } catch (Exception e) {
-            logger.error("{}添加新zk失败",e.getMessage());
+            logger.error("{}添加新zk失败", e.getMessage());
             throw new KeeperException.ConnectionLossException();
         }
         logger.info("{}启动成功...", clientName);
