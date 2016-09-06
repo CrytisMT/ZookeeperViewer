@@ -93,40 +93,40 @@
                         <label for="modalCZXid">CZXid</label>
                         <input id="modalCZXid" data-toggle="tooltip"
                                data-placement="top" title="节点创建时的zxid"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                         <label for="modalMZXid">modalMZXid</label>
                         <input id="modalMZXid" data-toggle="tooltip"
                                data-placement="top" title="最新一次更新发生时的zxid"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                     </div>
                     <div class="form-inline">
                         <label for="modalPZXid">modalPZXid</label>
                         <input id="modalPZXid" data-toggle="tooltip"
                                data-placement="top" title="不知道是啥"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                         <label for="modalCTime">modalCTime</label>
                         <input id="modalCTime" data-toggle="tooltip"
                                data-placement="top" title="节点创建时的时间戳"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                         <label for="modalMTime">modalMTime</label>
                         <input id="modalMTime" data-toggle="tooltip"
                                data-placement="top" title="节点最新一次更新发生时的时间戳"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                     </div>
                     <div class="form-inline">
 
                         <label for="modalVersion">modalVersion</label>
                         <input id="modalVersion" data-toggle="tooltip"
                                data-placement="top" title="节点数据的更新次数"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                         <label for="modalCVersion">modalCVersion</label>
                         <input id="modalCVersion" data-toggle="tooltip"
                                data-placement="top" title="子节点的更新次数"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                         <label for="modalAVersion">modalAVersion</label>
                         <input id="modalAVersion" data-toggle="tooltip"
                                data-placement="top" title="节点ACL(授权信息)的更新次数"
-                               class="form-control" disabled>
+                               class="form-control" readonly>
                     </div>
                     <div class="form-inline">
                         <label for="modalNumChildren">modalNumChildren</label>
@@ -135,14 +135,14 @@
                                data-placement="top"
                                title="子节点个数"
                                class="form-control"
-                               disabled>
+                               readonly>
                         <label for="modalEphemeralOwner">modalEphemeralOwner</label>
                         <input id="modalEphemeralOwner"
                                data-toggle="tooltip"
                                data-placement="top"
                                title="ephemeralOwner"
                                class="form-control"
-                               disabled>
+                               readonly>
                     </div>
                     <div class="form-group">
                         <label for="modalNodeData">Data</label>
@@ -348,8 +348,8 @@
         var stat = data.data.stat;
         $("#modalCZXid").val(stat.czxid);
         $("#modalMZXid").val(stat.mzxid);
-        $("#modalCTime").val(stat.ctime);
-        $("#modalMTime").val(stat.mtime);
+        $("#modalCTime").val(new Date(stat.ctime).toString());
+        $("#modalMTime").val(new Date(stat.mtime).toString());
         $("#modalVersion").val(stat.version);
         $("#modalCVersion").val(stat.cversion);
         $("#modalAVersion").val(stat.aversion);

@@ -51,7 +51,7 @@ public class InitService implements ApplicationContextAware {
             curatorFramework.start();
             registerBeanToSpring(server, curatorFramework);
         }
-        logger.info("curatorFramework实例创建完毕...");
+        logger.info("curatorFramework实例创建完毕...开始加载缓存");
         cacheService.reloadAll();
 
     }

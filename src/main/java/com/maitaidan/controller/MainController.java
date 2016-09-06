@@ -87,11 +87,11 @@ public class MainController {
         CuratorFramework currentClient = ZKClientContext.getCurrentClient();
         // TODO: 2016/7/5
         System.out.println(ZKUtil.listSubTreeBFS(currentClient.getZookeeperClient().getZooKeeper(), path));
-        byte[] dataBytes = currentClient.getData().forPath(path);
+        Stat stat = new Stat();
+        byte[] dataBytes = currentClient.getData().storingStatIn(stat).forPath(path);
         List<ACL> aclList = currentClient.getACL().forPath(path);
-        Stat stat = currentClient.getZookeeperClient().getZooKeeper().exists(path, false);
-        logger.info("acl:{}", aclList);
-        ZNode zNode = new ZNode(path, new String(dataBytes), aclList, stat);
+
+        ZNode zNode = new ZNode(path, new String(dataBytes == null ? new byte[0] : dataBytes), aclList, stat);
         return new GeneralResult<>(true, zNode, "success");
     }
 
@@ -104,7 +104,6 @@ public class MainController {
         }
         return new GeneralResult<List>(true, clientList, "success");
     }
-
 
 
     @RequestMapping("modifyValue")
